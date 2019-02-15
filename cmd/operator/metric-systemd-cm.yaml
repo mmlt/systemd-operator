@@ -1,0 +1,24 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: metric-systemd
+  labels:
+    operator: nto
+data:
+  metric-systemd.service: |
+    [Unit]
+    Description=Write systemd unit status to file so Prometheus NodeExporter can pick it up.
+
+    [Service]
+    Type=oneshot
+    Environment=LOGDIR=/var/tmp/node_exporter/textfile_collector
+    Environment=LOGFILE=/var/tmp/node_exporter/textfile_collector/metric-systemd
+    ExecStartPre=-/usr/bin/mkdir -p ${LOGDIR}
+    ExecStart=/usr/bin/sh -c "systemctl list-units --plain --no-legend | awk 'BEGIN {m[\"active\"]=0;m[\"reloading\"]=1;m[\"inactive\"]=2;m[\"failed\"]=3;m[\"activating\"]=4;m[\"deactivating\"]=5; print \"# TYPE systemd_unit_activation gauge\"} {gsub(/\\\\x/,\"-\"); print \"systemd_unit_activation{unit=\\\"\"$1\"\\\",load=\\\"\"$2\"\\\",sub=\\\"\"$4\"\\\"} \" m[$3] }' >${LOGFILE} && /usr/bin/mv ${LOGFILE} ${LOGFILE}.prom"
+
+  metric-systemd.timer: |
+    [Unit]
+    Description=Run service to write systemd unit status.
+
+    [Timer]
+    OnCalendar=*:0/2

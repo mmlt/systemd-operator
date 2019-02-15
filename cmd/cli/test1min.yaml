@@ -1,0 +1,14 @@
+test.service: |
+  [Unit]
+  Description=Prints date into /tmp/date file
+
+  [Service]
+  Type=oneshot
+  ExecStart=/usr/bin/sh -c '/usr/bin/date >> /tmp/date'
+
+test.timer: |
+  [Unit]
+  Description=Run date.service every 1 minutes
+
+  [Timer]
+  OnCalendar=*:0/1
