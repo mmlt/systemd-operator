@@ -32,7 +32,6 @@ var (
 		`The yaml file containing desired state.`)
 )
 
-
 func main() {
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
