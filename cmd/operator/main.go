@@ -7,6 +7,7 @@ import (
 	"github.com/mmlt/systemd-operator/internal/kclient"
 	"github.com/mmlt/systemd-operator/internal/operator"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
 	"io/ioutil"
 	"k8s.io/client-go/informers"
@@ -116,7 +117,7 @@ func main() {
 		"/etc/systemd/system/")
 
 	// Wire the components.
-	c.OnChange(op.Update) 	//TODO rename to c.OnInstruction(b.Execute)
+	c.OnChange(op.Update) //TODO rename to c.OnInstruction(b.Execute)
 
 	// Start the instances.
 	stop := make(chan struct{})
@@ -126,7 +127,7 @@ func main() {
 	go c.Run(stop, wg)
 
 	// Start prometheus endpoint
-	http.Handle("/metrics", prometheus.Handler())
+	http.Handle("/metrics", promhttp.Handler())
 	err = http.ListenAndServe(*promAddrs, nil)
 	if err != http.ErrServerClosed {
 		glog.Error(err)
@@ -147,5 +148,3 @@ func readFileOrReturnArg(pathOrPassword string) string {
 
 	return string(b)
 }
-
-
